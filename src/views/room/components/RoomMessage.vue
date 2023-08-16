@@ -1,13 +1,16 @@
 <script setup lang="ts">
 // 评价医生
-import type { Message } from '@/types/room'
+import type { Message, Prescription } from '@/types/room'
 import EvaluateCard from './EvaluateCard.vue'
-import { ConsultTime, MsgType } from '@/enums'
+import { ConsultTime, MsgType, PrescriptionStatus } from '@/enums'
 import { timeOptions, flagOptions } from '@/api/const'
-import { showImagePreview } from 'vant'
+import { showImagePreview, showToast } from 'vant'
 import type { Image } from '@/types/consult'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/stores'
+import { getPrescriptionPic } from '@/api/consult'
+import { useRouter } from 'vue-router'
+import { useLookPre } from '@/hooks'
 // 接收患者和医生的聊天信息
 defineProps<{
   list: Message[]
@@ -40,6 +43,22 @@ const store = useUserStore()
 // 5.解决图片消息滚动失败的问题 图片加载成功=> 执行滚动
 const loadSuccess = () => {
   window.scrollTo(0, document.body.scrollHeight)
+}
+
+// 查看处方
+/*const showPrescription = async (id?: string) => {
+  if (id) {
+    const res = await getPrescriptionPic(id)
+    showImagePreview([res.data.url])
+  }
+}*/
+const showPrescription = useLookPre()
+
+// 购买药品
+const router = useRouter()
+const buy = async (pre: Prescription) => {
+  if (pre.status === PrescriptionStatus.Invalid) return showToast('订单失效')
+  if (pre.status === PrescriptionStatus.NotPayment) router.push(`/medicine/pay?id=${pre.id}`)
 }
 </script>
 
@@ -119,37 +138,45 @@ const loadSuccess = () => {
       </div>
     </div>
     <!-- 8. 处方消息 -->
-    <div class="msg msg-recipe" v-if="false">
+    <div class="msg msg-recipe" v-if="msgType === MsgType.CardPre">
       <div class="content">
         <div class="head van-hairline--bottom">
           <div class="head-tit">
             <h3>电子处方</h3>
-            <p>原始处方 <van-icon name="arrow"></van-icon></p>
+            <p @click="showPrescription(msg.prescription?.id)">
+              原始处方 <van-icon name="arrow"></van-icon>
+            </p>
           </div>
-          <p>李富贵 男 31岁 血管性头痛</p>
-          <p>开方时间：2022-01-15 14:21:42</p>
+          <p>
+            {{ msg.prescription?.name }}
+            {{ msg.prescription?.genderValue }}
+            {{ msg.prescription?.age }}岁
+            {{ msg.prescription?.diagnosis }}
+          </p>
+          <p>开方时间：{{ msg.prescription?.createTime }}</p>
         </div>
         <div class="body">
-          <div class="body-item" v-for="i in 2" :key="i">
+          <div class="body-item" v-for="med in msg.prescription?.medicines" :key="med.id">
             <div class="durg">
-              <p>优赛明 维生素E乳</p>
-              <p>口服，每次1袋，每天3次，用药3天</p>
+              <p>{{ med.name }} {{ med.specs }}</p>
+              <p>{{ med.usageDosag }}</p>
             </div>
-            <div class="num">x1</div>
+            <div class="num">x{{ med.quantity }}</div>
           </div>
         </div>
-        <div class="foot"><span>购买药品</span></div>
+        <div class="foot" @click="buy(msg.prescription!)"><span>购买药品</span></div>
       </div>
     </div>
     <!-- 9. 订单取消 -->
-    <div class="msg msg-tip msg-tip-cancel" v-if="false">
+    <!-- 9. 订单取消/关闭诊室 -->
+    <div class="msg msg-tip msg-tip-cancel" v-if="msgType === MsgType.NotifyCancel">
       <div class="content">
-        <span>订单取消</span>
+        <span>{{ msg.content }}</span>
       </div>
     </div>
     <!-- 10. 医生评价 -->
-    <div class="msg" v-if="false">
-      <evaluate-card></evaluate-card>
+    <div class="msg" v-if="msgType === MsgType.CardEva || msgType === MsgType.CardEvaForm">
+      <evaluate-card :evaluateDoc="msg.evaluateDoc"></evaluate-card>
     </div>
   </template>
 </template>

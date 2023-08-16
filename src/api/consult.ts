@@ -9,7 +9,9 @@ import type {
   ConsultOrderPreData,
   ConsultOrderPreParams,
   PartialConsult,
-  ConsultOrderItem
+  ConsultOrderItem,
+  ConsultOrderListParams,
+  ConsultOrderPage
 } from '@/types/consult'
 import request from '@/utils/request'
 
@@ -54,3 +56,27 @@ export const getConsultOrderPayUrl = (data: {
 // 获取订单详情的接口
 export const getConsultOrderDetail = (orderId: string) =>
   request.get<ConsultOrderItem>('/patient/consult/order/detail', { params: { orderId } })
+
+// 提交评价
+export const evaluateConsultOrder = (data: {
+  docId: string // 医生ID
+  orderId: string // 订单ID
+  score: number // 评价星级
+  content: string // 评价留言
+  anonymousFlag: 0 | 1 // 是否匿名评价：1匿名 0实名
+}) => request.post('/patient/order/evaluate', data)
+
+// 查看处方
+// 查看处方
+export const getPrescriptionPic = (id: string) =>
+  request.get<{ url: string }>(`/patient/consult/prescription/${id}`)
+
+// 分页查看极速问诊
+export const getConsultOrderList = (params: ConsultOrderListParams) =>
+  request.get<ConsultOrderPage>('/patient/consult/order/list', { params })
+
+// 取消订单
+export const cancelOrder = (id: string) => request.put(`/patient/order/cancel/${id}`)
+
+// 删除订单
+export const deleteOrder = (id: string) => request.delete(`/patient/order/${id}`)

@@ -152,3 +152,15 @@ export type ConsultOrderItem = Consult & {
   pointDeduction: number
   actualPayment: number
 }
+
+// 根据通用分页类型定义
+export type ConsultOrderListParams = PageParams & {
+  type: ConsultType
+}
+
+// 极速问诊分页
+export type ConsultOrderPage = {
+  pageTotal: number
+  total: number
+  rows: ConsultOrderItem[]
+}

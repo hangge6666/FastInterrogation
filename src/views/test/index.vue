@@ -81,6 +81,20 @@ obj2.value.age = 20 // 断言后可以直接.赋值
  */
 const count = ref(1)
 const show = ref(true)
+
+const arr = [
+  {
+    id: 1,
+    name: 'zyh'
+  },
+  {
+    id: 2,
+    name: 'cnn'
+  }
+]
+const newItem = arr.find((item) => item.id === 2)
+newItem!.name = 'zjc'
+console.log(arr)
 </script>
 
 <style lang="scss" scoped>

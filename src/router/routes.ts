@@ -21,6 +21,7 @@ const routes = [
     // 相当于layout公共布局页面
     path: '/',
     component: () => import('@/views/layout/index.vue'),
+    redirect: '/home',
     children: [
       {
         path: 'home',
@@ -79,6 +80,17 @@ const routes = [
     path: '/room',
     component: () => import('@/views/room/index.vue'),
     meta: { title: '问诊室' }
+  },
+  {
+    path: '/user/consult',
+    component: () => import('@/views/user/ConsultOrder.vue'),
+    meta: { title: '问诊记录' }
+  },
+  // 订单详情
+  {
+    path: '/user/consult/:id',
+    component: () => import('@/views/user/ConsultDetail.vue'),
+    meta: { title: '问诊详情' }
   }
 ]
 export default routes

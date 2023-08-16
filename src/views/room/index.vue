@@ -13,6 +13,7 @@ import { MsgType, OrderType } from '@/enums'
 import type { ConsultOrderItem, Image } from '@/types/consult'
 import { getConsultOrderDetail } from '@/api/consult'
 import { nextTick } from 'vue'
+import { provide } from 'vue'
 const baseURL = 'https://consult-api.itheima.net'
 /**
  * 初始化创建 ws长连接
@@ -100,7 +101,6 @@ const getOrederDetail = async () => {
 }
 onMounted(() => {
   getOrederDetail()
-  console.log('consult', consult)
 })
 const sendText = (text: string) => {
   console.log(text)
@@ -130,6 +130,16 @@ const sendImg = (img: Image) => {
     }
   })
 }
+// 评价成功修改状态
+const completeEva = (score: number) => {
+  const item = list.value.find((item) => item.msgType === MsgType.CardEvaForm)
+  if (item) {
+    item.msg.evaluateDoc = { score }
+    item.msgType = MsgType.CardEva
+  }
+}
+provide('consult', consult)
+provide('completeEva', completeEva)
 </script>
 
 <template>
